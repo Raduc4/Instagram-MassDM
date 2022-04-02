@@ -4,12 +4,17 @@ import time
 import random
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+import json
 
-bot_username = ''
-bot_password = ''
+bot_username = 'radu.c4'
+bot_password = '_Iu01_9%pass'
 
-profiles = ['gunther.super']
-amount = 30
+profiles = []
+
+for user in json.load(open('./Result.json')):
+		profiles.append(user['username'])
+		print(user['username'])
+amount = 300
 
 # 'usernames' or 'links'
 result = 'usernames'
@@ -24,7 +29,7 @@ class Instagram():
 		options = Options()
 		options.add_experimental_option("excludeSwitches", ["enable-logging"])
 		self.browser = web.Chrome("chromedriver",options=options)
-		self.browser.set_window_size(400, 900)
+		self.browser.set_window_size(900, 900)
 
 	def close_browser(self):
 		self.browser.close()
@@ -61,51 +66,54 @@ class Instagram():
 			exist = False
 		return exist
 
-	def get_followers(self, users, amount):
+	def send_message(self, users, amount):
 		browser = self.browser
 		followers_list = []
 		for user in users:
 			browser.get('https://instagram.com/' + user)
+			# click on follow
+			# check whether the account is private
+			# click on message
+			# select text area
+			# paste text
+			# send
+			
 			time.sleep(random.randrange(3, 5))
-			followers_button = browser.find_element_by_xpath('/html/body/div[1]/section/main/div/ul/li[2]/a/span')
-			count = followers_button.get_attribute('title')
-			if ',' in count:
-				count = int(''.join(count.split(',')))
-			else:
-				count = int(count)
-			if amount > count:
-				print(f'You set amount = {amount} but there are {count} followers, then amount = {count}')
-				amount = count
+
+			followers_button = browser.find_element_by_xpath('/html/body/div[1]/section/main/div/header/section/div[1]/div[1]/div/div/div/span/span[2]/button')
+			# count = followers_button.get_attribute('title')
+			print(followers_button)
 			followers_button.click()
-			loops_count = int(amount / 12)
-			print(f'Scraping. Total: {amount} usernames. Wait {loops_count} iterations')
-			time.sleep(random.randrange(8,10))
-			followers_ul = browser.find_element_by_xpath("/html/body/div[6]/div/div/div[2]")
-			time.sleep(random.randrange(5,7))
-			try:		
-				for i in range(1, loops_count + 1):
-					browser.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", followers_ul)
-					time.sleep(random.randrange(8, 10))
-					all_div = followers_ul.find_elements_by_tag_name("li")
-					for us in all_div:
-						us = us.find_element_by_tag_name("a").get_attribute("href")
-						if result == 'usernames':
-							us1 = us.replace("https://www.instagram.com/", "")
-							us = us1.replace("/", "")
-						followers_list.append(us)
-					time.sleep(1)
-					f3 = open('userlist.txt', 'w')
-					for list in followers_list:
-						f3.write(list + '\n')
-					print(f'Got: {len(followers_list)} usernames of {amount}. Saved to file.')
-				time.sleep(random.randrange(3, 5))
-			except Exception as ex:
-				print(ex)
-				self.close_browser()
+
+			# loops_count = int(amount / 12)
+			# print(f'Scraping. Total: {amount} usernames. Wait {loops_count} iterations')
+			# time.sleep(random.randrange(8,10))
+			# followers_ul = browser.find_element_by_xpath("/html/body/div/section/main/div/header/section/div[2]/div/div/div/span/span[1]/button")
+			# time.sleep(random.randrange(5,7))
+			# try:		
+			# 	for i in range(1, loops_count + 1):
+			# 		browser.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight", followers_ul)
+			# 		time.sleep(random.randrange(8, 10))
+			# 		all_div = followers_ul.find_elements_by_tag_name("li")
+			# 		for us in all_div:
+			# 			us = us.find_element_by_tag_name("a").get_attribute("href")
+			# 			if result == 'usernames':
+			# 				us1 = us.replace("https://www.instagram.com/", "")
+			# 				us = us1.replace("/", "")
+			# 			followers_list.append(us)
+			# 		time.sleep(1)
+			# 		f3 = open('userlist.txt', 'w')
+			# 		for list in followers_list:
+			# 			f3.write(list + '\n')
+			# 		print(f'Got: {len(followers_list)} usernames of {amount}. Saved to file.')
+			# 	time.sleep(random.randrange(3, 5))
+			# except Exception as ex:
+			# 	print(ex)
+			# 	self.close_browser()
 		
-		return followers_list
+		# return followers_list
 
 
 bot = Instagram(bot_username, bot_password)
 bot.login()
-followers = bot.get_followers(profiles, amount)
+bot.send_message(profiles, amount)
